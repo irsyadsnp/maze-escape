@@ -1,0 +1,493 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maze Escape</title>
+<style>
+:root {
+  --bg: #101820;
+  --panel: #1b2a35;
+  --wall: #334b5c;
+  --floor: #e8e3d5;
+  --player: #4ade80;
+  --gold: #facc15;
+  --text: #f1f5f9;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+}
+
+h1 {
+  color: var(--gold);
+  font-size: 32px;
+  margin-bottom: 5px;
+  letter-spacing: 3px;
+}
+
+.subtitle {
+  color: #9ca3af;
+  margin-bottom: 20px;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-around;
+  background: var(--panel);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 15px;
+}
+
+.stat-label {
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.stat-value {
+  font-size: 20px;
+  color: var(--gold);
+  margin-top: 5px;
+}
+
+.game-wrapper {
+  background: var(--panel);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  border-radius: 5px;
+}
+
+.message {
+  min-height: 35px;
+  margin: 15px 0;
+  color: var(--player);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, 55px);
+  grid-template-rows: repeat(2, 48px);
+  gap: 7px;
+  justify-content: center;
+  margin: 15px auto;
+}
+
+.control-btn {
+  border: 0;
+  border-radius: 8px;
+  background: #334b5c;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.control-btn:active {
+  background: #4ade80;
+  color: #101820;
+}
+
+.up { grid-column: 2; }
+.left { grid-column: 1; grid-row: 2; }
+.down { grid-column: 2; grid-row: 2; }
+.right { grid-column: 3; grid-row: 2; }
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  border: 0;
+  border-radius: 7px;
+  padding: 11px 16px;
+  font-family: monospace;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.restart {
+  background: var(--gold);
+  color: #101820;
+}
+
+.hint {
+  background: #334b5c;
+  color: white;
+}
+
+.instructions {
+  color: #9ca3af;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>MAZE ESCAPE</h1>
+  <div class="subtitle">Find your way out.</div>
+
+  <div class="stats">
+    <div>
+      <div class="stat-label">STEPS</div>
+      <div class="stat-value" id="steps">0</div>
+    </div>
+    <div>
+      <div class="stat-label">TIME</div>
+      <div class="stat-value" id="time">00:00</div>
+    </div>
+    <div>
+      <div class="stat-label">STATUS</div>
+      <div class="stat-value" id="status">PLAY</div>
+    </div>
+  </div>
+
+  <div class="game-wrapper">
+    <canvas id="game" width="420" height="420"></canvas>
+  </div>
+
+  <div class="message" id="message">
+    Reach the golden exit to escape!
+  </div>
+
+  <div class="controls">
+    <button class="control-btn up" data-dir="up">▲</button>
+    <button class="control-btn left" data-dir="left">◀</button>
+    <button class="control-btn down" data-dir="down">▼</button>
+    <button class="control-btn right" data-dir="right">▶</button>
+  </div>
+
+  <div class="actions">
+    <button class="action-btn restart" id="restart">↻ RESTART</button>
+    <button class="action-btn hint" id="hint">✦ SHOW HINT</button>
+  </div>
+
+  <div class="instructions">
+    KEYBOARD: WASD / ARROW KEYS<br>
+    MOBILE: USE THE DIRECTION BUTTONS<br>
+    Avoid the walls and find the golden exit.
+  </div>
+
+</div>
+
+<script>
+const maze = [
+  "11111111111111",
+  "10000010000001",
+  "10111010111001",
+  "10001000001001",
+  "11101011101001",
+  "10000000100001",
+  "10111110101111",
+  "10000000100001",
+  "10111011101001",
+  "10001000001001",
+  "10101110111001",
+  "10000010000001",
+  "10111000011001",
+  "11111111111111"
+];
+
+const SIZE = 14;
+const CELL = 30;
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const stepsElement = document.getElementById("steps");
+const timeElement = document.getElementById("time");
+const statusElement = document.getElementById("status");
+const messageElement = document.getElementById("message");
+
+let player;
+let steps;
+let started;
+let finished;
+let startTime;
+let elapsed;
+let timer;
+let hintPath = [];
+
+const startPosition = { x: 1, y: 1 };
+const exitPosition = { x: 12, y: 12 };
+
+function isWall(x, y) {
+  return maze[y]?.[x] !== "0";
+}
+
+function resetGame() {
+  player = { ...startPosition };
+  steps = 0;
+  started = false;
+  finished = false;
+  startTime = null;
+  elapsed = 0;
+  hintPath = [];
+
+  clearInterval(timer);
+
+  stepsElement.textContent = "0";
+  timeElement.textContent = "00:00";
+  statusElement.textContent = "PLAY";
+  messageElement.textContent = "Reach the golden exit to escape!";
+
+  draw();
+}
+
+function updateTimer() {
+  if (!started || finished) return;
+
+  elapsed = Math.floor((Date.now() - startTime) / 1000);
+
+  const minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
+  const seconds = String(elapsed % 60).padStart(2, "0");
+
+  timeElement.textContent = `${minutes}:${seconds}`;
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const px = x * CELL;
+      const py = y * CELL;
+
+      if (isWall(x, y)) {
+        ctx.fillStyle = "#334b5c";
+        ctx.fillRect(px, py, CELL, CELL);
+
+        ctx.fillStyle = "#405d70";
+        ctx.fillRect(px + 3, py + 3, CELL - 6, CELL - 6);
+      } else {
+        ctx.fillStyle = "#e8e3d5";
+        ctx.fillRect(px, py, CELL, CELL);
+      }
+
+      ctx.strokeStyle = "rgba(0,0,0,0.08)";
+      ctx.strokeRect(px, py, CELL, CELL);
+    }
+  }
+
+  // Start
+  ctx.fillStyle = "#60a5fa";
+  ctx.fillRect(
+    startPosition.x * CELL + 8,
+    startPosition.y * CELL + 8,
+    14,
+    14
+  );
+
+  // Exit
+  ctx.fillStyle = "#facc15";
+  ctx.fillRect(
+    exitPosition.x * CELL + 5,
+    exitPosition.y * CELL + 5,
+    20,
+    20
+  );
+
+  // Hint path
+  if (hintPath.length > 0) {
+    ctx.fillStyle = "rgba(59,130,246,0.45)";
+
+    hintPath.forEach(point => {
+      ctx.fillRect(
+        point.x * CELL + 8,
+        point.y * CELL + 8,
+        14,
+        14
+      );
+    });
+  }
+
+  // Player
+  const px = player.x * CELL;
+  const py = player.y * CELL;
+
+  ctx.fillStyle = "#16a34a";
+  ctx.fillRect(px + 5, py + 5, 20, 20);
+
+  ctx.fillStyle = "#4ade80";
+  ctx.fillRect(px + 8, py + 8, 14, 14);
+
+  // Player eyes
+  ctx.fillStyle = "#101820";
+  ctx.fillRect(px + 10, py + 11, 3, 3);
+  ctx.fillRect(px + 18, py + 11, 3, 3);
+}
+
+function move(dx, dy) {
+  if (finished) return;
+
+  const nextX = player.x + dx;
+  const nextY = player.y + dy;
+
+  if (isWall(nextX, nextY)) return;
+
+  if (!started) {
+    started = true;
+    startTime = Date.now();
+    timer = setInterval(updateTimer, 250);
+  }
+
+  player.x = nextX;
+  player.y = nextY;
+  steps++;
+
+  stepsElement.textContent = steps;
+  hintPath = [];
+
+  if (
+    player.x === exitPosition.x &&
+    player.y === exitPosition.y
+  ) {
+    winGame();
+  }
+
+  draw();
+}
+
+function winGame() {
+  finished = true;
+  clearInterval(timer);
+  updateTimer();
+
+  statusElement.textContent = "WIN";
+  messageElement.textContent =
+    `You escaped! Completed in ${steps} steps and ${timeElement.textContent}.`;
+}
+
+function findPath() {
+  const queue = [{
+    x: player.x,
+    y: player.y,
+    path: []
+  }];
+
+  const visited = new Set();
+  const directions = [
+    { x: 0, y: -1 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+    { x: 1, y: 0 }
+  ];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    const key = `${current.x},${current.y}`;
+
+    if (visited.has(key)) continue;
+    visited.add(key);
+
+    if (
+      current.x === exitPosition.x &&
+      current.y === exitPosition.y
+    ) {
+      return current.path;
+    }
+
+    for (const direction of directions) {
+      const nx = current.x + direction.x;
+      const ny = current.y + direction.y;
+
+      const nextKey = `${nx},${ny}`;
+
+      if (!isWall(nx, ny) && !visited.has(nextKey)) {
+        queue.push({
+          x: nx,
+          y: ny,
+          path: [...current.path, { x: nx, y: ny }]
+        });
+      }
+    }
+  }
+
+  return [];
+}
+
+function showHint() {
+  if (finished) return;
+
+  hintPath = findPath();
+  draw();
+
+  messageElement.textContent =
+    "Blue squares show the shortest route to the exit.";
+}
+
+document.addEventListener("keydown", event => {
+  const keys = {
+    ArrowUp: [0, -1],
+    w: [0, -1],
+    W: [0, -1],
+    ArrowDown: [0, 1],
+    s: [0, 1],
+    S: [0, 1],
+    ArrowLeft: [-1, 0],
+    a: [-1, 0],
+    A: [-1, 0],
+    ArrowRight: [1, 0],
+    d: [1, 0],
+    D: [1, 0]
+  };
+
+  if (keys[event.key]) {
+    event.preventDefault();
+    move(...keys[event.key]);
+  }
+});
+
+document.querySelectorAll(".control-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    const directions = {
+      up: [0, -1],
+      down: [0, 1],
+      left: [-1, 0],
+      right: [1, 0]
+    };
+
+    move(...directions[button.dataset.dir]);
+  });
+});
+
+document.getElementById("restart").addEventListener("click", resetGame);
+document.getElementById("hint").addEventListener("click", showHint);
+
+resetGame();
+</script>
+</body>
+</html>
