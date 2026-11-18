@@ -3,910 +3,505 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maze Escape 2.0</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maze Escape</title>
 <style>
-:root {
-  --bg: #101820;
-  --panel: #1b2a35;
-  --wall: #344e60;
-  --floor: #e8e3d5;
-  --green: #4ade80;
-  --gold: #facc15;
-  --red: #fb7185;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: var(--bg);
-  color: white;
-  font-family: monospace;
-}
-
-.container {
-  width: 100%;
-  max-width: 540px;
-  text-align: center;
-}
-
-h1 {
-  color: var(--gold);
-  letter-spacing: 3px;
-  font-size: 30px;
-  margin-bottom: 5px;
-}
-
-.subtitle {
-  color: #9ca3af;
-  margin-bottom: 18px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
-  margin-bottom: 12px;
-}
-
-.stat {
-  background: var(--panel);
-  border-radius: 8px;
-  padding: 10px 3px;
-}
-
-.stat-label {
-  font-size: 10px;
-  color: #9ca3af;
-}
-
-.stat-value {
-  font-size: 18px;
-  margin-top: 6px;
-  color: var(--gold);
-}
-
-.game-wrapper {
-  background: var(--panel);
-  padding: 10px;
-  border-radius: 12px;
-}
-
-canvas {
-  width: 100%;
-  height: auto;
-  display: block;
-  image-rendering: pixelated;
-  border-radius: 5px;
-}
-
-.message {
-  min-height: 42px;
-  margin: 12px 0;
-  color: var(--green);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.controls {
-  display: grid;
-  grid-template-columns: repeat(3, 58px);
-  grid-template-rows: repeat(2, 48px);
-  gap: 7px;
-  justify-content: center;
-  margin: 14px auto;
-}
-
-.control-btn {
-  border: 0;
-  border-radius: 8px;
-  background: #344e60;
-  color: white;
-  font-size: 21px;
-  touch-action: manipulation;
-  cursor: pointer;
-}
-
-.control-btn:active {
-  background: var(--green);
-  color: #101820;
-}
-
-.up { grid-column: 2; }
-.left { grid-column: 1; grid-row: 2; }
-.down { grid-column: 2; grid-row: 2; }
-.right { grid-column: 3; grid-row: 2; }
-
-.actions {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.action-btn {
-  border: 0;
-  border-radius: 7px;
-  padding: 11px 14px;
-  font-family: monospace;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.restart {
-  background: var(--gold);
-  color: #101820;
-}
-
-.hint {
-  background: #344e60;
-  color: white;
-}
-
-.sound {
-  background: #475569;
-  color: white;
-}
-
-.legend {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 13px;
-  color: #9ca3af;
-  font-size: 11px;
-  margin-top: 17px;
-}
-
-.instructions {
-  color: #9ca3af;
-  font-size: 11px;
-  line-height: 1.7;
-  margin-top: 15px;
-}
-
-@media (max-width: 400px) {
-  body { padding: 10px; }
-  h1 { font-size: 25px; }
-  .stat-value { font-size: 15px; }
-}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:#0b1420;color:#eef2ff;font-family:monospace;display:flex;justify-content:center}
+main{width:100%;max-width:560px;text-align:center}
+h1{color:#facc15;letter-spacing:3px;margin-bottom:5px}
+.sub{color:#94a3b8;margin-bottom:18px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:8px 0}
+.stat,.panel{background:#1b2a3a;border-radius:9px;padding:10px 4px}
+.stat small{display:block;color:#94a3b8;font-size:10px}
+.stat strong{display:block;color:#facc15;font-size:17px;margin-top:5px}
+canvas{display:block;width:100%;height:auto;background:#111c28;border-radius:8px;image-rendering:pixelated}
+.panel{margin-top:10px;color:#cbd5e1;font-size:12px;line-height:1.8}
+.message{min-height:38px;color:#4ade80;padding:12px 4px;font-size:13px}
+.controls{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(2,48px);gap:7px;justify-content:center;margin:12px}
+button{border:0;border-radius:8px;padding:11px;background:#344b60;color:white;font-family:monospace;font-weight:bold;cursor:pointer;touch-action:manipulation}
+button:active{filter:brightness(1.5)}
+.up{grid-column:2}.left{grid-column:1;grid-row:2}.down{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}
+.actions{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.primary{background:#facc15;color:#17202b}
+.power{color:#a5f3fc}
+#leaderboard{text-align:left;padding-left:25px}
+.legend{font-size:11px;color:#94a3b8;line-height:2;margin-top:14px}
 </style>
 </head>
-
 <body>
-<div class="container">
+<main>
+<h1>MAZE ESCAPE 3.0</h1>
+<div class="sub">ADVENTURE MODE</div>
 
-  <h1>MAZE ESCAPE 2.0</h1>
-  <div class="subtitle">Collect. Survive. Escape.</div>
-
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-label">LEVEL</div>
-      <div class="stat-value" id="level">1/3</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">SCORE</div>
-      <div class="stat-value" id="score">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">COINS</div>
-      <div class="stat-value" id="coins">0/0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">LIVES</div>
-      <div class="stat-value" id="lives">♥♥♥</div>
-    </div>
-  </div>
-
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-label">TIME</div>
-      <div class="stat-value" id="time">00:00</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">STEPS</div>
-      <div class="stat-value" id="steps">0</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">STATUS</div>
-      <div class="stat-value" id="status">PLAY</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">BEST</div>
-      <div class="stat-value" id="best">0</div>
-    </div>
-  </div>
-
-  <div class="game-wrapper">
-    <canvas id="game" width="480" height="480"></canvas>
-  </div>
-
-  <div class="message" id="message">
-    Collect all coins and find the exit!
-  </div>
-
-  <div class="controls">
-    <button class="control-btn up" data-dir="up">▲</button>
-    <button class="control-btn left" data-dir="left">◀</button>
-    <button class="control-btn down" data-dir="down">▼</button>
-    <button class="control-btn right" data-dir="right">▶</button>
-  </div>
-
-  <div class="actions">
-    <button class="action-btn restart" id="restart">↻ RESTART</button>
-    <button class="action-btn hint" id="hint">✦ HINT</button>
-    <button class="action-btn sound" id="sound">♫ SOUND ON</button>
-  </div>
-
-  <div class="legend">
-    <span>🟩 YOU</span>
-    <span>🟥 ENEMY</span>
-    <span>🟡 COIN</span>
-    <span>🚪 EXIT</span>
-  </div>
-
-  <div class="instructions">
-    KEYBOARD: WASD / ARROW KEYS<br>
-    MOBILE: USE THE DIRECTION BUTTONS<br>
-    Collect every coin before reaching the exit.
-  </div>
-
+<div class="stats">
+ <div class="stat"><small>LEVEL</small><strong id="level">1/3</strong></div>
+ <div class="stat"><small>SCORE</small><strong id="score">0</strong></div>
+ <div class="stat"><small>COINS</small><strong id="coins">0/0</strong></div>
+ <div class="stat"><small>LIVES</small><strong id="lives">♥♥♥</strong></div>
+</div>
+<div class="stats">
+ <div class="stat"><small>TIME</small><strong id="time">00:00</strong></div>
+ <div class="stat"><small>STEPS</small><strong id="steps">0</strong></div>
+ <div class="stat"><small>COMBO</small><strong id="combo">x1</strong></div>
+ <div class="stat"><small>BEST</small><strong id="best">0</strong></div>
 </div>
 
+<div class="panel">
+ <canvas id="game" width="480" height="480"></canvas>
+</div>
+
+<div class="message" id="message">Collect coins, avoid enemies, and find the exit.</div>
+
+<div class="panel power">
+ <b>POWER-UPS</b><br>
+ <span id="powers">No active power-up</span>
+</div>
+
+<div class="controls">
+ <button class="up" data-dir="up">▲</button>
+ <button class="left" data-dir="left">◀</button>
+ <button class="down" data-dir="down">▼</button>
+ <button class="right" data-dir="right">▶</button>
+</div>
+
+<div class="actions">
+ <button class="primary" id="restart">↻ RESTART</button>
+ <button id="hint">✦ HINT</button>
+ <button id="sound">♫ SOUND ON</button>
+</div>
+
+<div class="panel">
+ <b>LEADERBOARD — TOP 5</b>
+ <ol id="leaderboard"><li>Belum ada skor</li></ol>
+</div>
+
+<div class="legend">
+ 🟩 PLAYER &nbsp; 🟥 CHASER &nbsp; 🟪 PATROL &nbsp; 🟧 GUARD<br>
+ 🟡 COIN &nbsp; 🛡 SHIELD &nbsp; ⚡ SPEED &nbsp; 🧲 MAGNET &nbsp; 🚪 EXIT
+ <br>Keyboard: WASD / Arrow Keys
+</div>
+</main>
+
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const $=id=>document.getElementById(id);
+const canvas=$("game"),ctx=canvas.getContext("2d");
 
-const $ = id => document.getElementById(id);
-
-const LEVELS = [
-  { size: 15, coinCount: 5 },
-  { size: 19, coinCount: 8 },
-  { size: 23, coinCount: 12 }
+const configs=[
+ {size:15,coins:5,enemies:2},
+ {size:19,coins:8,enemies:3},
+ {size:23,coins:12,enemies:4}
 ];
 
-let level = 0;
-let maze = [];
-let size = 15;
-let cell = 32;
+let level=0,size=15,cell=32,maze=[];
+let player={x:1,y:1};
+let exit={x:13,y:13};
+let enemies=[],coins=[],items=[],hint=[];
+let score=0,lives=3,steps=0,collected=0,combo=0;
+let started=false,finished=false,gameOver=false;
+let startTime=0,elapsed=0,timer=null;
+let soundOn=true,audio=null;
+let shield=0,speed=0,magnet=0;
+let invulnerable=0,enemyClock=0;
+let lastMove=0,animation=0;
 
-let player = { x: 1, y: 1 };
-let enemy = { x: 1, y: 1 };
-let exit = { x: 13, y: 13 };
+let best=Number(localStorage.getItem("maze30best")||0);
+let records=JSON.parse(localStorage.getItem("maze30records")||"[]");
+$("best").textContent=best;
 
-let coins = [];
-let hintPath = [];
+function shuffle(a){
+ for(let i=a.length-1;i>0;i--){
+  let j=Math.floor(Math.random()*(i+1));
+  [a[i],a[j]]=[a[j],a[i]];
+ }
+ return a;
+}
 
-let score = 0;
-let steps = 0;
-let lives = 3;
-let collected = 0;
-
-let started = false;
-let finished = false;
-let gameOver = false;
-
-let startTime = 0;
-let elapsed = 0;
-let timer = null;
-let enemyCounter = 0;
-
-let soundOn = true;
-let audioContext = null;
-
-let best = Number(localStorage.getItem("mazeBest") || 0);
-$("best").textContent = best;
-
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+function generateMaze(n){
+ let g=Array.from({length:n},()=>Array(n).fill(1));
+ let stack=[{x:1,y:1}];g[1][1]=0;
+ while(stack.length){
+  let p=stack[stack.length-1];
+  let dirs=shuffle([{x:0,y:-2},{x:0,y:2},{x:-2,y:0},{x:2,y:0}]);
+  let found=false;
+  for(let d of dirs){
+   let x=p.x+d.x,y=p.y+d.y;
+   if(x>0&&x<n-1&&y>0&&y<n-1&&g[y][x]===1){
+    g[p.y+d.y/2][p.x+d.x/2]=0;
+    g[y][x]=0;stack.push({x,y});found=true;break;
+   }
   }
-  return array;
+  if(!found)stack.pop();
+ }
+ return g;
 }
 
-function generateMaze(n) {
-  const grid = Array.from(
-    { length: n },
-    () => Array(n).fill(1)
-  );
+function wall(x,y){
+ return x<0||y<0||x>=size||y>=size||maze[y][x]===1;
+}
 
-  const stack = [{ x: 1, y: 1 }];
-  grid[1][1] = 0;
+function randomFloor(exclude=[]){
+ let cells=[];
+ for(let y=1;y<size-1;y++)for(let x=1;x<size-1;x++){
+  if(wall(x,y))continue;
+  if(exclude.some(p=>p.x===x&&p.y===y))continue;
+  cells.push({x,y});
+ }
+ return cells[Math.floor(Math.random()*cells.length)];
+}
 
-  while (stack.length) {
-    const current = stack[stack.length - 1];
+function makeLevel(){
+ let cfg=configs[level];
+ size=cfg.size;cell=480/size;
+ maze=generateMaze(size);
+ player={x:1,y:1};
+ exit={x:size-2,y:size-2};
+ coins=[];items=[];enemies=[];hint=[];
+ collected=0;steps=0;combo=0;
+ shield=0;speed=0;magnet=0;invulnerable=0;
+ enemyClock=0;
+ let excluded=[player,exit,{x:1,y:2},{x:2,y:1}];
 
-    const directions = shuffle([
-      { x: 0, y: -2 },
-      { x: 0, y: 2 },
-      { x: -2, y: 0 },
-      { x: 2, y: 0 }
-    ]);
+ for(let i=0;i<cfg.coins;i++){
+  let p=randomFloor(excluded);
+  if(p){coins.push(p);excluded.push(p);}
+ }
 
-    let found = false;
-
-    for (const d of directions) {
-      const nx = current.x + d.x;
-      const ny = current.y + d.y;
-
-      if (
-        nx > 0 && nx < n - 1 &&
-        ny > 0 && ny < n - 1 &&
-        grid[ny][nx] === 1
-      ) {
-        grid[current.y + d.y / 2][current.x + d.x / 2] = 0;
-        grid[ny][nx] = 0;
-
-        stack.push({ x: nx, y: ny });
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) stack.pop();
+ const types=["chaser","patrol","guard"];
+ for(let i=0;i<cfg.enemies;i++){
+  let p=randomFloor(excluded);
+  if(p){
+   enemies.push({
+    ...p,type:types[i%3],
+    origin:{...p},direction:1
+   });
+   excluded.push(p);
   }
+ }
 
-  return grid;
+ const powers=["shield","speed","magnet"];
+ for(let type of powers){
+  let p=randomFloor(excluded);
+  if(p){items.push({...p,type});excluded.push(p);}
+ }
+
+ started=false;finished=false;gameOver=false;
+ clearInterval(timer);
+ $("level").textContent=(level+1)+"/3";
+ $("message").textContent="Level "+(level+1)+": collect every coin!";
+ $("time").textContent="00:00";
+ $("steps").textContent="0";
+ $("combo").textContent="x1";
+ $("status")?.remove();
+ updateUI();draw();
 }
 
-function isWall(x, y) {
-  return (
-    x < 0 || y < 0 ||
-    x >= size || y >= size ||
-    maze[y][x] === 1
-  );
+function updateUI(){
+ $("score").textContent=score;
+ $("coins").textContent=collected+"/"+(collected+coins.length);
+ $("lives").textContent="♥".repeat(lives)+"♡".repeat(3-lives);
+ $("steps").textContent=steps;
+ $("powers").textContent=[
+  shield>0?"🛡 Shield "+shield+"s":"",
+  speed>0?"⚡ Speed "+speed+"s":"",
+  magnet>0?"🧲 Magnet "+magnet+"s":""
+ ].filter(Boolean).join(" | ")||"No active power-up";
 }
 
-function randomFloor(excluded = []) {
-  const available = [];
+function begin(){
+ if(started)return;
+ started=true;startTime=Date.now();
+ timer=setInterval(()=>{
+  elapsed=Math.floor((Date.now()-startTime)/1000);
+  $("time").textContent=
+   String(Math.floor(elapsed/60)).padStart(2,"0")+":"+
+   String(elapsed%60).padStart(2,"0");
+  if(shield>0)shield=Math.max(0,shield-.25);
+  if(speed>0)speed=Math.max(0,speed-.25);
+  if(magnet>0)magnet=Math.max(0,magnet-.25);
+  if(invulnerable>0)invulnerable=Math.max(0,invulnerable-.25);
+  updateUI();
+ },250);
+}
 
-  for (let y = 1; y < size - 1; y++) {
-    for (let x = 1; x < size - 1; x++) {
-      if (maze[y][x] !== 0) continue;
+function beep(freq=440,duration=.08){
+ if(!soundOn)return;
+ try{
+  audio ||=new(window.AudioContext||window.webkitAudioContext)();
+  if(audio.state==="suspended")audio.resume();
+  let o=audio.createOscillator(),g=audio.createGain();
+  o.type="square";o.frequency.value=freq;
+  g.gain.setValueAtTime(.05,audio.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);
+  o.connect(g);g.connect(audio.destination);
+  o.start();o.stop(audio.currentTime+duration);
+ }catch(e){}
+}
 
-      const blocked = excluded.some(
-        p => p.x === x && p.y === y
-      );
-
-      if (!blocked) available.push({ x, y });
-    }
+function draw(){
+ ctx.clearRect(0,0,480,480);
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+  let px=x*cell,py=y*cell;
+  ctx.fillStyle=wall(x,y)?"#344e60":"#e8e3d5";
+  ctx.fillRect(px,py,cell,cell);
+  if(wall(x,y)){
+   ctx.fillStyle="#405d70";
+   ctx.fillRect(px+cell*.12,py+cell*.12,cell*.76,cell*.76);
   }
+  ctx.strokeStyle="rgba(0,0,0,.09)";
+  ctx.strokeRect(px,py,cell,cell);
+ }
 
-  return available[Math.floor(Math.random() * available.length)];
+ // Hint
+ ctx.fillStyle="rgba(59,130,246,.45)";
+ hint.forEach(p=>ctx.fillRect(p.x*cell+cell*.3,p.y*cell+cell*.3,cell*.4,cell*.4));
+
+ // Coins
+ coins.forEach(p=>{
+  ctx.fillStyle="#facc15";ctx.beginPath();
+  ctx.arc((p.x+.5)*cell,(p.y+.5)*cell,cell*.23,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#fff5b0";ctx.fillRect((p.x+.4)*cell,(p.y+.3)*cell,cell*.1,cell*.15);
+ });
+
+ // Power-ups
+ items.forEach(p=>{
+  let color={shield:"#38bdf8",speed:"#fb923c",magnet:"#c084fc"}[p.type];
+  ctx.fillStyle=color;
+  ctx.beginPath();ctx.arc((p.x+.5)*cell,(p.y+.5)*cell,cell*.3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#102030";
+  ctx.font=`${cell*.48}px monospace`;
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText({shield:"S",speed:"⚡",magnet:"M"}[p.type],(p.x+.5)*cell,(p.y+.5)*cell);
+ });
+
+ // Exit
+ ctx.fillStyle="#a16207";
+ ctx.fillRect(exit.x*cell+cell*.12,exit.y*cell+cell*.12,cell*.76,cell*.76);
+ ctx.fillStyle="#facc15";
+ ctx.fillRect(exit.x*cell+cell*.22,exit.y*cell+cell*.22,cell*.56,cell*.56);
+
+ // Enemies
+ enemies.forEach(e=>{
+  ctx.fillStyle={chaser:"#ef4444",patrol:"#a855f7",guard:"#f97316"}[e.type];
+  ctx.fillRect(e.x*cell+cell*.15,e.y*cell+cell*.15,cell*.7,cell*.7);
+  ctx.fillStyle="white";
+  ctx.fillRect(e.x*cell+cell*.29,e.y*cell+cell*.3,cell*.12,cell*.12);
+  ctx.fillRect(e.x*cell+cell*.59,e.y*cell+cell*.3,cell*.12,cell*.12);
+ });
+
+ // Animated player
+ let bob=Math.sin(animation/120)*cell*.035;
+ ctx.fillStyle=invulnerable>0&&Math.floor(animation/100)%2===0?"white":"#15803d";
+ ctx.fillRect(player.x*cell+cell*.12,player.y*cell+cell*.12+bob,cell*.76,cell*.76);
+ ctx.fillStyle="#4ade80";
+ ctx.fillRect(player.x*cell+cell*.24,player.y*cell+cell*.24+bob,cell*.52,cell*.52);
+ ctx.fillStyle="#102030";
+ ctx.fillRect(player.x*cell+cell*.34,player.y*cell+cell*.35+bob,cell*.09,cell*.09);
+ ctx.fillRect(player.x*cell+cell*.58,player.y*cell+cell*.35+bob,cell*.09,cell*.09);
+
+ if(shield>0){
+  ctx.strokeStyle="#38bdf8";ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.arc((player.x+.5)*cell,(player.y+.5)*cell,cell*.52,0,Math.PI*2);
+  ctx.stroke();ctx.lineWidth=1;
+ }
 }
 
-function createLevel() {
-  const config = LEVELS[level];
+function collect(){
+ let ci=coins.findIndex(p=>p.x===player.x&&p.y===player.y);
+ if(ci>=0){
+  coins.splice(ci,1);collected++;combo++;
+  let points=100+Math.min(combo-1,5)*25;
+  score+=points;beep(700,.1);
+  $("combo").textContent="x"+Math.min(combo,6);
+  $("message").textContent="Coin collected! +"+points+" points";
+ }else combo=0;
 
-  size = config.size;
-  cell = 480 / size;
+ let pi=items.findIndex(p=>p.x===player.x&&p.y===player.y);
+ if(pi>=0){
+  let item=items.splice(pi,1)[0];
+  if(item.type==="shield")shield=10;
+  if(item.type==="speed")speed=10;
+  if(item.type==="magnet")magnet=10;
+  score+=50;beep(950,.15);
+  $("message").textContent="Power-up activated: "+item.type.toUpperCase();
+ }
 
-  maze = generateMaze(size);
-
-  player = { x: 1, y: 1 };
-  exit = { x: size - 2, y: size - 2 };
-
-  maze[exit.y][exit.x] = 0;
-
-  coins = [];
-  collected = 0;
-  hintPath = [];
-  enemyCounter = 0;
-
-  const excluded = [
-    player,
-    exit,
-    { x: 1, y: 2 },
-    { x: 2, y: 1 }
-  ];
-
-  for (let i = 0; i < config.coinCount; i++) {
-    const coin = randomFloor(excluded);
-    if (!coin) break;
-
-    coins.push(coin);
-    excluded.push(coin);
+ if(magnet>0&&coins.length){
+  let nearest=coins.findIndex(c=>Math.abs(c.x-player.x)+Math.abs(c.y-player.y)<=2);
+  if(nearest>=0){
+   coins.splice(nearest,1);collected++;score+=100;
+   $("message").textContent="Magnet collected a nearby coin! +100";
   }
-
-  enemy = randomFloor(excluded);
-
-  steps = 0;
-  started = false;
-  finished = false;
-  gameOver = false;
-
-  clearInterval(timer);
-
-  $("level").textContent = `${level + 1}/3`;
-  $("coins").textContent = `0/${coins.length}`;
-  $("steps").textContent = "0";
-  $("status").textContent = "PLAY";
-  $("message").textContent =
-    `Level ${level + 1}: collect all coins and escape!`;
-
-  draw();
-  updateStats();
+ }
+ updateUI();
 }
 
-function updateStats() {
-  $("score").textContent = score;
-  $("lives").textContent = "♥".repeat(lives) + "♡".repeat(3 - lives);
-  $("steps").textContent = steps;
-  $("coins").textContent = `${collected}/${coins.length}`;
+function hit(){
+ if(shield>0||invulnerable>0)return;
+ lives--;invulnerable=2;
+ beep(130,.25);
+ if(lives<=0){endGame();return;}
+ player={x:1,y:1};
+ $("message").textContent="Caught by an enemy! Lost one life.";
+ updateUI();
 }
 
-function updateTimer() {
-  if (!started || finished || gameOver) return;
+function enemyMove(){
+ enemies.forEach(e=>{
+  let choices=[
+   {x:e.x+1,y:e.y},{x:e.x-1,y:e.y},
+   {x:e.x,y:e.y+1},{x:e.x,y:e.y-1}
+  ].filter(p=>!wall(p.x,p.y));
 
-  elapsed = Math.floor((Date.now() - startTime) / 1000);
+  if(!choices.length)return;
+  let next;
 
-  const min = String(Math.floor(elapsed / 60)).padStart(2, "0");
-  const sec = String(elapsed % 60).padStart(2, "0");
-
-  $("time").textContent = `${min}:${sec}`;
-}
-
-function playSound(frequency = 440, duration = 0.08) {
-  if (!soundOn) return;
-
-  try {
-    audioContext ||= new (
-      window.AudioContext || window.webkitAudioContext
-    )();
-
-    if (audioContext.state === "suspended") {
-      audioContext.resume();
-    }
-
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-
-    oscillator.frequency.value = frequency;
-    oscillator.type = "square";
-
-    gain.gain.setValueAtTime(0.07, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-      0.001,
-      audioContext.currentTime + duration
-    );
-
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + duration);
-  } catch (error) {
-    // Audio is optional.
+  if(e.type==="chaser"){
+   choices.sort((a,b)=>
+    (Math.abs(a.x-player.x)+Math.abs(a.y-player.y))-
+    (Math.abs(b.x-player.x)+Math.abs(b.y-player.y))
+   );
+   next=choices[0];
+  }else if(e.type==="patrol"){
+   let forward=choices.find(p=>p.x===e.x+e.direction);
+   if(!forward)e.direction*=-1;
+   next=choices.find(p=>p.x===e.x+e.direction)||choices[0];
+  }else{
+   let near=choices.filter(p=>
+    Math.abs(p.x-e.origin.x)+Math.abs(p.y-e.origin.y)<=2
+   );
+   next=near[Math.floor(Math.random()*near.length)]||choices[0];
   }
+  e.x=next.x;e.y=next.y;
+  if(e.x===player.x&&e.y===player.y)hit();
+ });
 }
 
-function draw() {
-  ctx.clearRect(0, 0, 480, 480);
+function move(dx,dy){
+ if(finished||gameOver)return;
+ let now=Date.now();
+ let delay=speed>0?75:115;
+ if(now-lastMove<delay)return;
+ lastMove=now;
 
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const px = x * cell;
-      const py = y * cell;
+ let nx=player.x+dx,ny=player.y+dy;
+ if(wall(nx,ny)){beep(130,.04);return;}
+ begin();
+ player={x:nx,y:ny};steps++;hint=[];
+ collect();
 
-      if (maze[y][x] === 1) {
-        ctx.fillStyle = "#344e60";
-        ctx.fillRect(px, py, cell, cell);
+ enemyClock++;
+ if(enemyClock>=3){enemyClock=0;enemyMove();}
+ if(enemies.some(e=>e.x===player.x&&e.y===player.y))hit();
 
-        ctx.fillStyle = "#405d70";
-        ctx.fillRect(
-          px + cell * 0.12,
-          py + cell * 0.12,
-          cell * 0.76,
-          cell * 0.76
-        );
-      } else {
-        ctx.fillStyle = "#e8e3d5";
-        ctx.fillRect(px, py, cell, cell);
-      }
-
-      ctx.strokeStyle = "rgba(0,0,0,0.08)";
-      ctx.strokeRect(px, py, cell, cell);
-    }
-  }
-
-  // Hint path
-  ctx.fillStyle = "rgba(59,130,246,0.5)";
-
-  hintPath.forEach(p => {
-    ctx.fillRect(
-      p.x * cell + cell * 0.3,
-      p.y * cell + cell * 0.3,
-      cell * 0.4,
-      cell * 0.4
-    );
-  });
-
-  // Coins
-  coins.forEach(coin => {
-    ctx.fillStyle = "#facc15";
-    ctx.beginPath();
-    ctx.arc(
-      (coin.x + 0.5) * cell,
-      (coin.y + 0.5) * cell,
-      cell * 0.23,
-      0,
-      Math.PI * 2
-    );
-    ctx.fill();
-
-    ctx.fillStyle = "#fff4a3";
-    ctx.beginPath();
-    ctx.arc(
-      (coin.x + 0.42) * cell,
-      (coin.y + 0.4) * cell,
-      cell * 0.07,
-      0,
-      Math.PI * 2
-    );
-    ctx.fill();
-  });
-
-  // Exit
-  ctx.fillStyle = "#a16207";
-  ctx.fillRect(
-    exit.x * cell + cell * 0.15,
-    exit.y * cell + cell * 0.15,
-    cell * 0.7,
-    cell * 0.7
-  );
-
-  ctx.fillStyle = "#facc15";
-  ctx.fillRect(
-    exit.x * cell + cell * 0.23,
-    exit.y * cell + cell * 0.23,
-    cell * 0.54,
-    cell * 0.54
-  );
-
-  // Enemy
-  ctx.fillStyle = "#be123c";
-  ctx.fillRect(
-    enemy.x * cell + cell * 0.17,
-    enemy.y * cell + cell * 0.17,
-    cell * 0.66,
-    cell * 0.66
-  );
-
-  ctx.fillStyle = "white";
-  ctx.fillRect(
-    enemy.x * cell + cell * 0.28,
-    enemy.y * cell + cell * 0.32,
-    cell * 0.13,
-    cell * 0.13
-  );
-
-  ctx.fillRect(
-    enemy.x * cell + cell * 0.58,
-    enemy.y * cell + cell * 0.32,
-    cell * 0.13,
-    cell * 0.13
-  );
-
-  // Player
-  ctx.fillStyle = "#15803d";
-  ctx.fillRect(
-    player.x * cell + cell * 0.12,
-    player.y * cell + cell * 0.12,
-    cell * 0.76,
-    cell * 0.76
-  );
-
-  ctx.fillStyle = "#4ade80";
-  ctx.fillRect(
-    player.x * cell + cell * 0.24,
-    player.y * cell + cell * 0.24,
-    cell * 0.52,
-    cell * 0.52
-  );
-
-  ctx.fillStyle = "#101820";
-  ctx.fillRect(
-    player.x * cell + cell * 0.34,
-    player.y * cell + cell * 0.35,
-    cell * 0.09,
-    cell * 0.09
-  );
-
-  ctx.fillRect(
-    player.x * cell + cell * 0.58,
-    player.y * cell + cell * 0.35,
-    cell * 0.09,
-    cell * 0.09
-  );
+ if(player.x===exit.x&&player.y===exit.y){
+  if(coins.length===0){completeLevel();return;}
+  $("message").textContent="Collect all remaining coins before escaping!";
+ }
+ updateUI();draw();
 }
 
-function startGameTimer() {
-  if (started) return;
-
-  started = true;
-  startTime = Date.now();
-
-  timer = setInterval(updateTimer, 250);
+function pathfind(){
+ let queue=[{...player,path:[]}],seen=new Set();
+ while(queue.length){
+  let p=queue.shift(),key=p.x+","+p.y;
+  if(seen.has(key))continue;seen.add(key);
+  if(p.x===exit.x&&p.y===exit.y)return p.path;
+  for(let d of [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}]){
+   let x=p.x+d.x,y=p.y+d.y;
+   if(!wall(x,y)&&!seen.has(x+","+y))
+    queue.push({x,y,path:[...p.path,{x,y}]});
+  }
+ }
+ return [];
 }
 
-function move(dx, dy) {
-  if (finished || gameOver) return;
-
-  const nx = player.x + dx;
-  const ny = player.y + dy;
-
-  if (isWall(nx, ny)) {
-    playSound(130, 0.05);
-    return;
-  }
-
-  startGameTimer();
-
-  player = { x: nx, y: ny };
-  steps++;
-  enemyCounter++;
-
-  hintPath = [];
-
-  const coinIndex = coins.findIndex(
-    c => c.x === player.x && c.y === player.y
-  );
-
-  if (coinIndex !== -1) {
-    coins.splice(coinIndex, 1);
-    collected++;
-    score += 100;
-    playSound(700, 0.1);
-
-    $("message").textContent = "Coin collected! +100 points";
-  }
-
-  if (enemyCounter >= 3) {
-    enemyCounter = 0;
-    moveEnemy();
-  }
-
-  if (player.x === enemy.x && player.y === enemy.y) {
-    hitEnemy();
-  }
-
-  if (
-    player.x === exit.x &&
-    player.y === exit.y
-  ) {
-    if (coins.length === 0) {
-      completeLevel();
-      return;
-    }
-
-    $("message").textContent =
-      `You still need ${coins.length} more coin(s)!`;
-  }
-
-  updateStats();
-  draw();
+function completeLevel(){
+ finished=true;clearInterval(timer);
+ score+=Math.max(0,500-elapsed*2);
+ beep(850,.3);
+ if(level<2){
+  $("message").textContent="LEVEL COMPLETE! Preparing next stage...";
+  updateUI();
+  setTimeout(()=>{level++;makeLevel();},1300);
+ }else victory();
 }
 
-function moveEnemy() {
-  const directions = shuffle([
-    { x: 0, y: -1 },
-    { x: 0, y: 1 },
-    { x: -1, y: 0 },
-    { x: 1, y: 0 }
-  ]);
-
-  const options = directions
-    .map(d => ({ x: enemy.x + d.x, y: enemy.y + d.y }))
-    .filter(p => !isWall(p.x, p.y));
-
-  if (options.length) {
-    enemy = options[0];
-  }
-
-  if (player.x === enemy.x && player.y === enemy.y) {
-    hitEnemy();
-  }
+function victory(){
+ finished=true;clearInterval(timer);
+ score+=lives*200;
+ $("message").textContent="YOU ESCAPED! Final score: "+score;
+ if(score>best){
+  best=score;localStorage.setItem("maze30best",best);
+  $("best").textContent=best;
+ }
+ records.push({score,time:elapsed,date:new Date().toLocaleDateString()});
+ records.sort((a,b)=>b.score-a.score);
+ records=records.slice(0,5);
+ localStorage.setItem("maze30records",JSON.stringify(records));
+ showLeaderboard();updateUI();beep(1100,.4);
 }
 
-function hitEnemy() {
-  lives--;
-  playSound(150, 0.25);
-
-  if (lives <= 0) {
-    endGame();
-    return;
-  }
-
-  player = { x: 1, y: 1 };
-  enemy = randomFloor([player, exit, ...coins]);
-
-  $("message").textContent =
-    `The enemy caught you! ${lives} life(s) remaining.`;
-
-  updateStats();
-  draw();
+function endGame(){
+ finished=true;gameOver=true;clearInterval(timer);
+ $("message").textContent="GAME OVER — Score: "+score+". Press Restart.";
+ updateUI();draw();
 }
 
-function completeLevel() {
-  finished = true;
-  clearInterval(timer);
-  updateTimer();
-
-  score += Math.max(0, 500 - elapsed * 3);
-  playSound(850, 0.25);
-
-  if (level < LEVELS.length - 1) {
-    $("status").textContent = "CLEAR";
-    $("message").textContent =
-      `Level ${level + 1} complete! Preparing next level...`;
-
-    updateStats();
-
-    setTimeout(() => {
-      level++;
-      createLevel();
-    }, 1200);
-  } else {
-    winGame();
-  }
+function showLeaderboard(){
+ $("leaderboard").innerHTML=records.length?
+ records.map(r=>`<li>${r.score} points — ${r.time}s — ${r.date}</li>`).join("")
+ :"<li>Belum ada skor</li>";
 }
 
-function winGame() {
-  finished = true;
-  clearInterval(timer);
-
-  score += lives * 200;
-
-  $("status").textContent = "WIN";
-  $("message").textContent =
-    `YOU ESCAPED! Final score: ${score}`;
-
-  if (score > best) {
-    best = score;
-    localStorage.setItem("mazeBest", best);
-    $("best").textContent = best;
-  }
-
-  updateStats();
-  draw();
+function restart(){
+ clearInterval(timer);
+ level=0;score=0;lives=3;elapsed=0;
+ $("time").textContent="00:00";
+ makeLevel();
 }
 
-function endGame() {
-  gameOver = true;
-  finished = true;
+document.addEventListener("keydown",e=>{
+ let keys={
+  ArrowUp:[0,-1],w:[0,-1],W:[0,-1],
+  ArrowDown:[0,1],s:[0,1],S:[0,1],
+  ArrowLeft:[-1,0],a:[-1,0],A:[-1,0],
+  ArrowRight:[1,0],d:[1,0],D:[1,0]
+ };
+ if(keys[e.key]){e.preventDefault();move(...keys[e.key]);}
+});
 
-  clearInterval(timer);
-
-  $("status").textContent = "LOST";
-  $("message").textContent =
-    `GAME OVER! Final score: ${score}. Press Restart to try again.`;
-
-  updateStats();
-  draw();
-}
-
-function findPath() {
-  const queue = [{
-    x: player.x,
-    y: player.y,
-    path: []
-  }];
-
-  const visited = new Set();
-  const directions = [
-    { x: 0, y: -1 },
-    { x: 0, y: 1 },
-    { x: -1, y: 0 },
-    { x: 1, y: 0 }
-  ];
-
-  while (queue.length) {
-    const current = queue.shift();
-    const key = `${current.x},${current.y}`;
-
-    if (visited.has(key)) continue;
-    visited.add(key);
-
-    if (current.x === exit.x && current.y === exit.y) {
-      return current.path;
-    }
-
-    for (const d of directions) {
-      const nx = current.x + d.x;
-      const ny = current.y + d.y;
-
-      if (!isWall(nx, ny) && !visited.has(`${nx},${ny}`)) {
-        queue.push({
-          x: nx,
-          y: ny,
-          path: [...current.path, { x: nx, y: ny }]
-        });
-      }
-    }
-  }
-
-  return [];
-}
-
-function showHint() {
-  if (finished) return;
-
-  hintPath = findPath();
-
-  draw();
-
-  $("message").textContent =
-    "Blue squares show the shortest route to the exit.";
-}
-
-function restartGame() {
-  clearInterval(timer);
-
-  level = 0;
-  score = 0;
-  steps = 0;
-  lives = 3;
-  elapsed = 0;
-
-  $("time").textContent = "00:00";
-
-  createLevel();
-}
-
-document.addEventListener("keydown", event => {
-  const keys = {
-    ArrowUp: [0, -1],
-    w: [0, -1],
-    W: [0, -1],
-    ArrowDown: [0, 1],
-    s: [0, 1],
-    S: [0, 1],
-    ArrowLeft: [-1, 0],
-    a: [-1, 0],
-    A: [-1, 0],
-    ArrowRight: [1, 0],
-    d: [1, 0],
-    D: [1, 0]
+document.querySelectorAll("[data-dir]").forEach(b=>{
+ b.addEventListener("click",()=>{
+  let d={
+   up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]
   };
-
-  if (keys[event.key]) {
-    event.preventDefault();
-    move(...keys[event.key]);
-  }
+  move(...d[b.dataset.dir]);
+ });
 });
 
-document.querySelectorAll(".control-btn").forEach(button => {
-  button.addEventListener("click", () => {
-    const dirs = {
-      up: [0, -1],
-      down: [0, 1],
-      left: [-1, 0],
-      right: [1, 0]
-    };
+$("restart").onclick=restart;
+$("hint").onclick=()=>{
+ if(finished)return;
+ hint=pathfind();draw();
+ $("message").textContent="Blue squares show the shortest route.";
+};
+$("sound").onclick=()=>{
+ soundOn=!soundOn;
+ $("sound").textContent=soundOn?"♫ SOUND ON":"♫ SOUND OFF";
+ if(soundOn)beep(500,.1);
+};
 
-    move(...dirs[button.dataset.dir]);
-  });
-});
+function animate(){
+ animation++;
+ draw();
+ requestAnimationFrame(animate);
+}
 
-$("restart").addEventListener("click", restartGame);
-$("hint").addEventListener("click", showHint);
-
-$("sound").addEventListener("click", () => {
-  soundOn = !soundOn;
-  $("sound").textContent = soundOn ? "♫ SOUND ON" : "♫ SOUND OFF";
-
-  if (soundOn) playSound(500, 0.1);
-});
-
-createLevel();
+makeLevel();
+showLeaderboard();
+requestAnimationFrame(animate);
 </script>
 </body>
 </html>
